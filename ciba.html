@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sesuatu yang spesial</title>
+    <title>Surat Hati untuk Kamu</title>
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
     <style>
         /* === RESET & VARIABLES === */
@@ -873,7 +873,7 @@
 <body>
     <!-- Audio Element -->
     <audio id="backgroundMusic" loop preload="auto">
-        <source src="pelengkap.mp3" type="audio/mpeg">
+        <source src="pelengkap2.mp3" type="audio/mpeg">
         Browser tidak mendukung audio.
     </audio>
     
@@ -892,11 +892,11 @@
     <div class="intro-page" id="introPage">
         <div class="intro-content">
             <div class="intro-heart">💌</div>
-            <h1 class="intro-title">Sebuah Surat dariku untukmu</h1>
+            <h1 class="intro-title">Sebuah Surat dari Hatiku</h1>
             <p class="intro-subtitle">Untuk seseorang yang sangat spesial...</p>
-            <p style="margin-bottom: 30px; font-size: 1.1em;">Ada sesuatu yang mau ku berikan kepadamu</p>
+            <p style="margin-bottom: 30px; font-size: 1.1em;">Ada sesuatu yang ingin kusampaikan dengan tulus</p>
             <button class="begin-btn" id="beginBtn">Buka Surat Ini 💖</button>
-            <p style="margin-top: 30px; font-size: 0.9em; opacity: 0.7;">Dibuat oleh someone who liked you</p>
+            <p style="margin-top: 30px; font-size: 0.9em; opacity: 0.7;">Dibuat dengan penuh perasaan</p>
         </div>
     </div>
     
@@ -906,16 +906,16 @@
             <div class="seal">❤️</div>
             
             <div class="letter-header">
-                <h1 class="recipient" contenteditable="true" id="recipientName">Untuk mu yang kusukai</h1>
-                <p class="date-place" id="datePlace">Hari ini, di mana pun kamu berada</p>
+                <h1 class="recipient" contenteditable="true" id="recipientName">Untuk Kamu yang Tersayang</h1>
+                <p class="date-place" id="datePlace">Hari ini, di mana pun kita berada</p>
             </div>
             
             <div class="letter-body">
                 <div class="paragraph" id="para1">
-                    <p>Ini mungkin terdengar aneh, tapi aku harus mengatakan bahwa: <span class="highlight">aku menyukaimu</span>. ini bukan masalah perasaan yang tiba tiba muncul, tapi perasaan yang sudah aku pendam sejak lama dan sudah sejak lama ingin aku sampaikan ke kamu tetapi waktu belum memberiku jalan untuk mengungkapkan perasanku.</p>
+                    <p>Ini mungkin terdengar klise, tapi aku harus mengatakannya: <span class="highlight">aku menyukaimu</span>. Bukan sekadar suka biasa, tapi perasaan yang tumbuh perlahan, mengisi setiap ruang di hatiku tanpa kusadari.</p>
                 </div>
                 <div class="paragraph" id="para2">
-                    <p>Setiap kali aku melihat mu tersenyum, seolah olah  duniaku  menjadi lebih cerah ya walaupun aku harus mencuri pandang untuk melihat dirimu. Kamu membuatku merasa... <span class="highlight">diperhatikan</span>, <span class="highlight">dipahami</span>, dan <span class="highlight">berharga</span>.</p>
+                    <p>Setiap kali kamu tersenyum, dunia seolah menjadi lebih cerah. Setiap kali kita berbicara, waktu terasa berlalu terlalu cepat. Kamu membuatku merasa... <span class="highlight">diperhatikan</span>, <span class="highlight">dipahami</span>, dan <span class="highlight">berharga</span>.</p>
                 </div>
                 <div class="paragraph" id="para3">
                     <p>Aku tahu kita semua punya kekurangan. Tapi justru itulah yang membuatku semakin tertarik—melihat kamu apa adanya, dengan segala keunikan dan kejujuranmu. Kamu tidak perlu menjadi sempurna, karena versi kamu yang sekarang sudah <span class="highlight">cukup berarti</span> bagiku.</p>
@@ -934,7 +934,12 @@
             </div>
             
             <div class="closing">
-                <p>Apapun jawabanmu, terima kasih sudah membaca surat ini. Terimakasih juga karena sudah ada di dunia ini.</p>
+                <p>Apapun responsmu, terima kasih sudah mendengarkan. Terima kasih sudah menjadi bagian dari hidupku, walau mungkin hanya sesaat.</p>
+                <div class="signature">
+                    Dengan hati yang berdebar,<br>
+                    <span contenteditable="true" style="border-bottom: 2px dashed var(--rose); padding: 0 10px;">[Nama Pengirim]</span>
+                </div>
+                <p class="ps-note">PS: Kamu bisa mengedit namaku atau namamu di atas dengan mengkliknya</p>
             </div>
         </div>
     </div>
@@ -1494,9 +1499,328 @@ ${feedbackData.message ? `📝 <b>Pesan:</b>\n${feedbackData.message}\n` : ''}
         window.closeModalAndCelebrate = closeModalAndCelebrate;
         window.showFeedbackForm = showFeedbackForm;
         window.hideFeedbackForm = hideFeedbackForm;
+        // ============================================
+// FITUR TAMBAHAN: PILIHAN LAGU (2 LAGU ATAU LEBIH)
+// ============================================
+
+// 1. Inisialisasi lagu-lagu tambahan
+const additionalTracks = [
+    { id: 1, name: "Echanted ", file: "pelengkap2.mp3", emoji: "💖" },
+    { id: 2, name: "Kau Adalah", file: "pelengkap.mp3", emoji: "🎵" },
+    { id: 3, name: "Lagu Romantis 3", file: "lagu3.mp3", emoji: "✨" }
+];
+
+let currentTrack = 1; // Track aktif saat ini
+const audioElements = [];
+
+// 2. Tambahkan CSS untuk fitur pilihan lagu
+const musicSelectorStyle = document.createElement('style');
+musicSelectorStyle.textContent = `
+    .music-selector-btn {
+        background: none;
+        border: none;
+        color: var(--deep-pink);
+        cursor: pointer;
+        padding: 5px 8px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-left: 5px;
+        transition: all 0.3s;
+        font-size: 1.1em;
+    }
+    
+    .music-selector-btn:hover {
+        background: var(--soft-pink);
+        transform: rotate(15deg);
+    }
+    
+    .music-selector-modal {
+        position: fixed;
+        bottom: 80px;
+        right: 20px;
+        background: rgba(255, 255, 255, 0.98);
+        border-radius: 15px;
+        padding: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        z-index: 1001;
+        border: 1px solid var(--soft-pink);
+        backdrop-filter: blur(10px);
+        display: none;
+        animation: fadeInUp 0.3s ease;
+        width: 200px;
+        max-width: 90vw;
+    }
+    
+    .music-selector-modal.show {
+        display: block;
+    }
+    
+    .selector-title {
+        font-size: 0.9em;
+        color: var(--deep-pink);
+        margin-bottom: 10px;
+        font-weight: bold;
+        text-align: center;
+        border-bottom: 1px solid var(--soft-pink);
+        padding-bottom: 8px;
+    }
+    
+    .music-option {
+        display: flex;
+        align-items: center;
+        padding: 10px 12px;
+        margin: 6px 0;
+        background: var(--cream);
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.3s;
+        border: 2px solid transparent;
+    }
+    
+    .music-option:hover {
+        background: white;
+        transform: translateX(5px);
+        box-shadow: 0 3px 10px rgba(255,107,139,0.15);
+    }
+    
+    .music-option.active {
+        background: var(--soft-pink);
+        border-color: var(--rose);
+        position: relative;
+    }
+    
+    .music-option.active::after {
+        content: '🎵';
+        margin-left: auto;
+        animation: heartbeat 1.5s infinite;
+    }
+    
+    .option-emoji {
+        margin-right: 10px;
+        font-size: 1.2em;
+        min-width: 24px;
+        text-align: center;
+    }
+    
+    .option-text {
+        font-size: 0.9em;
+        color: var(--text);
+        flex-grow: 1;
+    }
+    
+    .selector-close {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background: none;
+        border: none;
+        color: var(--text);
+        cursor: pointer;
+        padding: 4px;
+        border-radius: 50%;
+        font-size: 0.9em;
+        opacity: 0.6;
+    }
+    
+    .selector-close:hover {
+        background: var(--soft-pink);
+        opacity: 1;
+    }
+    
+    /* Responsive untuk music selector */
+    @media (max-width: 768px) {
+        .music-selector-modal {
+            bottom: 75px;
+            right: 15px;
+            width: 180px;
+            padding: 12px;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .music-selector-modal {
+            bottom: 70px;
+            right: 10px;
+            width: 160px;
+            padding: 10px;
+        }
+        
+        .music-option {
+            padding: 8px 10px;
+        }
+        
+        .option-text {
+            font-size: 0.85em;
+        }
+    }
+`;
+document.head.appendChild(musicSelectorStyle);
+
+// 3. Fungsi untuk setup fitur pilihan lagu
+function setupMusicSelector() {
+    // Buat tombol pilih lagu
+    const musicSelectorBtn = document.createElement('button');
+    musicSelectorBtn.className = 'music-selector-btn';
+    musicSelectorBtn.innerHTML = '🎶';
+    musicSelectorBtn.title = 'Pilih Lagu';
+    musicSelectorBtn.id = 'musicSelectorBtn';
+    
+    // Tempatkan tombol di music player
+    const musicPlayer = document.getElementById('musicPlayer');
+    if (musicPlayer) {
+        musicPlayer.appendChild(musicSelectorBtn);
+    }
+    
+    // Buat modal untuk pilihan lagu
+    const musicSelectorModal = document.createElement('div');
+    musicSelectorModal.className = 'music-selector-modal';
+    musicSelectorModal.id = 'musicSelectorModal';
+    
+    // Isi modal
+    musicSelectorModal.innerHTML = `
+        <button class="selector-close" id="closeMusicSelector">✕</button>
+        <div class="selector-title">🎵 Pilih Lagu</div>
+        ${additionalTracks.map(track => `
+            <div class="music-option ${track.id === 1 ? 'active' : ''}" data-track="${track.id}">
+                <span class="option-emoji">${track.emoji}</span>
+                <span class="option-text">${track.name}</span>
+            </div>
+        `).join('')}
+    `;
+    
+    document.body.appendChild(musicSelectorModal);
+    
+    // Event listeners untuk music selector
+    document.getElementById('musicSelectorBtn').addEventListener('click', function(e) {
+        e.stopPropagation();
+        musicSelectorModal.classList.toggle('show');
+    });
+    
+    document.getElementById('closeMusicSelector').addEventListener('click', function(e) {
+        e.stopPropagation();
+        musicSelectorModal.classList.remove('show');
+    });
+    
+    // Event listener untuk pilihan lagu
+    document.querySelectorAll('.music-option').forEach(option => {
+        option.addEventListener('click', function() {
+            const trackId = parseInt(this.getAttribute('data-track'));
+            if (trackId !== currentTrack) {
+                switchTrack(trackId);
+            }
+            musicSelectorModal.classList.remove('show');
+        });
+    });
+    
+    // Tutup modal saat klik di luar
+    document.addEventListener('click', function(event) {
+        if (!musicSelectorModal.contains(event.target) && 
+            !musicSelectorBtn.contains(event.target) &&
+            musicSelectorModal.classList.contains('show')) {
+            musicSelectorModal.classList.remove('show');
+        }
+    });
+    
+    // Inisialisasi audio elements
+    initializeAudioElements();
+}
+
+// 4. Fungsi untuk inisialisasi audio elements
+function initializeAudioElements() {
+    additionalTracks.forEach(track => {
+        const audio = new Audio(track.file);
+        audio.loop = true;
+        audio.volume = currentVolume;
+        audioElements[track.id] = audio;
+    });
+    
+    // Set backgroundMusic sebagai track 1
+    audioElements[1] = backgroundMusic;
+}
+
+// 5. Fungsi untuk ganti track
+function switchTrack(trackId) {
+    if (trackId === currentTrack) return;
+    
+    // Simpan status play/pause
+    const wasPlaying = isMusicPlaying;
+    
+    // Pause track yang sedang aktif
+    if (isMusicPlaying) {
+        pauseBackgroundMusic();
+    }
+    
+    // Update current track
+    currentTrack = trackId;
+    
+    // Update backgroundMusic source
+    backgroundMusic.pause();
+    if (trackId === 1) {
+        backgroundMusic.src = 'pelengkap2.mp3';
+    } else {
+        backgroundMusic.src = additionalTracks.find(t => t.id === trackId).file;
+    }
+    backgroundMusic.load();
+    backgroundMusic.volume = currentVolume;
+    
+    // Update UI untuk track aktif
+    document.querySelectorAll('.music-option').forEach(option => {
+        option.classList.remove('active');
+        if (parseInt(option.getAttribute('data-track')) === trackId) {
+            option.classList.add('active');
+        }
+    });
+    
+    // Jika sebelumnya sedang play, play track baru
+    if (wasPlaying) {
+        setTimeout(() => {
+            playBackgroundMusic();
+        }, 100);
+    }
+    
+    // Efek visual
+    createFloatingHearts(5);
+}
+
+// 6. Override fungsi updateVolume untuk update semua track
+const originalUpdateVolume = updateVolume;
+updateVolume = function() {
+    originalUpdateVolume();
+    
+    // Update volume untuk semua audio elements
+    Object.values(audioElements).forEach(audio => {
+        if (audio) {
+            audio.volume = currentVolume;
+        }
+    });
+};
+
+// 7. Inisialisasi saat DOM siap
+document.addEventListener('DOMContentLoaded', function() {
+    // Tunggu sedikit untuk memastikan semua elemen sudah ada
+    setTimeout(() => {
+        setupMusicSelector();
+    }, 500);
+});
+
+// 8. Override fungsi beginLetter untuk inisialisasi track
+const originalBeginLetter = beginLetter;
+beginLetter = function() {
+    originalBeginLetter();
+    
+    // Pastikan music selector sudah terinisialisasi
+    setTimeout(() => {
+        if (!document.getElementById('musicSelectorBtn')) {
+            setupMusicSelector();
+        }
+    }, 100);
+};
+
+// ============================================
+// AKHIR FITUR TAMBAHAN
+// ============================================
     </script>
 </body>
-
 </html>
-
-
