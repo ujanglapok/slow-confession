@@ -1295,7 +1295,7 @@ setTimeout(() => {
                             showFeedbackConfirmation(feedbackData);
                             // Reset button
                             setTimeout(() => {
-                                sendFeedbackBtn.innerHTML = 'Kirim Jawabanku 💌';
+                                sendFeedbackBtn.innerHTML = 'Kirim Jawabanku';
                                 sendFeedbackBtn.classList.remove('sending');
                                 sendFeedbackBtn.disabled = false;
                             }, 2000);
@@ -1526,6 +1526,7 @@ const additionalTracks = [
     { id: 1, name: "About You", file: "pelengkap3.mp3", emoji: "💖" },
     { id: 2, name: "Echanted", file: "pelengkap2.mp3", emoji: "🎵" },
     { id: 3, name: "Kau Adalah", file: "pelengkap.mp3", emoji: "✨" }
+    { id: 4, name: "Message in the bottle", file: "pelengkap4.mp3", emoji: "🫧"}
 ];
 
 let currentTrack = 1; // Track aktif saat ini
@@ -1842,5 +1843,6 @@ beginLetter = function() {
     </script>
 </body>
 </html>
+
 
 
