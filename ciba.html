@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Surat Hati untuk Kamu</title>
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+    <!-- Tambahkan di <head> -->
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+
     <style>
         /* === RESET & VARIABLES === */
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -235,7 +238,7 @@
         }
         
         .signature {
-            font-family: 'Dancing Script', cursive;
+            font-family: 'Times New Roman', Times, serif;
             font-size: 2.5em;
             color: var(--rose);
             margin: 20px 0;
@@ -906,7 +909,7 @@
             <div class="seal">❤️</div>
             
             <div class="letter-header">
-                <h1 class="recipient" contenteditable="true" id="recipientName">Untuk Kamu yang Tersayang</h1>
+                <h1 class="recipient" id="recipientName">Untuk Kamu yang Tersayang</h1>
                 <p class="date-place" id="datePlace">Hari ini, di mana pun kita berada</p>
             </div>
             
@@ -937,9 +940,13 @@
                 <p>Apapun responsmu, terima kasih sudah mendengarkan. Terima kasih sudah menjadi bagian dari hidupku, walau mungkin hanya sesaat.</p>
                 <div class="signature">
                     Dengan hati yang berdebar,<br>
-                    <span contenteditable="true" style="border-bottom: 2px dashed var(--rose); padding: 0 10px;">[Nama Pengirim]</span>
+                <span style="border-bottom: 2px dashed var(--rose); padding: 0 10px; color: var(--deep-pink); 
+                font-weight: bold; font-family: Arial, sans-serif; user-select: none; -webkit-user-select: none;">
+        ❤️ Rizky
+    </span>
+</div>
+                    <h1 class="recipient" id="recipientName" style="color: var(--deep-pink); font-weight: bold; font-family: Arial, Helvetica, sans-serif;">Untukmu banun</h1>
                 </div>
-                <p class="ps-note">PS: Kamu bisa mengedit namaku atau namamu di atas dengan mengkliknya</p>
             </div>
         </div>
     </div>
@@ -970,8 +977,8 @@
                 <div class="feedback-option" data-value="ragu">
                     <div class="option-icon">🤔</div>
                     <div class="option-text">
-                        <h3>?????</h3>
-                        <p>??????1</p>
+                        <h3>Aku masih ragu</h3>
+                        <p>Butuh waktu untuk memikirkan perasaanku</p>
                     </div>
                 </div>
             </div>
@@ -1057,7 +1064,26 @@
             
             // Mobile volume icon update
             updateVolumeIcon();
-        });
+
+        });// === SET NAMA DEFAULT (EDIT DI SINI) ===
+const defaultSenderName = "Someone who liked you"; // GANTI DENGAN NAMA ANDA
+const defaultRecipientName = "For You"; // GANTI DENGAN NAMA PENERIMA
+
+// Set nama default jika belum ada yang disimpan
+setTimeout(() => {
+    const savedSender = localStorage.getItem('suratCinta_senderName');
+    const savedRecipient = localStorage.getItem('suratCinta_recipientName');
+    
+    if (!savedSender || savedSender === '[Nama Pengirim]') {
+        document.querySelector('.signature span[contenteditable="true"]').textContent = defaultSenderName;
+        localStorage.setItem('suratCinta_senderName', defaultSenderName);
+    }
+    
+    if (!savedRecipient || savedRecipient === 'Untuk Kamu yang Tersayang') {
+        document.getElementById('recipientName').textContent = defaultRecipientName;
+        localStorage.setItem('suratCinta_recipientName', defaultRecipientName);
+    }
+}, 100);
 
         // === LETTER FUNCTIONS ===
         function beginLetter() {
@@ -1816,8 +1842,3 @@ beginLetter = function() {
     </script>
 </body>
 </html>
-
-
-
-
-
