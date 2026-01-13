@@ -1106,6 +1106,7 @@ setTimeout(() => {
                 if (!isMusicPlaying) {
                     setTimeout(() => playBackgroundMusic(), 500);
                 }
+                showMusicHint();
             }, 1000);
         }
         
@@ -2310,6 +2311,52 @@ guideStyle.textContent = `
 document.head.appendChild(guideStyle);
 
 // 3. Fungsi untuk show music guide
+function showMusicHint() {
+    // SELALU tampilkan petunjuk setiap kali surat dibuka
+    
+    // Buat toast notification SEDERHANA seperti sebelumnya
+    setTimeout(() => {
+        const toast = document.createElement('div');
+        toast.innerHTML = `
+            <div style="
+                position: fixed;
+                bottom: 100px;
+                right: 20px;
+                background: linear-gradient(135deg, var(--rose), var(--deep-pink));
+                color: white;
+                padding: 12px 18px;
+                border-radius: 15px;
+                z-index: 1001;
+                animation: fadeInUp 0.5s ease;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                box-shadow: 0 8px 25px rgba(255,107,139,0.3);
+                max-width: 250px;
+                backdrop-filter: blur(5px);
+            ">
+                <span style="font-size: 1.3em;">🎵</span>
+                <div>
+                    <div style="font-weight: bold;">Pilih lagu favoritmu!</div>
+                    <div style="font-size: 0.85em; opacity: 0.9;">Klik ikon 🎶 untuk ganti lagu</div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(toast);
+        
+        // Auto hide setelah 5 detik
+        setTimeout(() => {
+            if (toast.parentElement) {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(20px)';
+                setTimeout(() => toast.remove(), 500);
+            }
+        }, 5000);
+        
+    }, 1500); // Delay 1.5 detik setelah music player muncul
+}
+
 function showMusicGuide() {
     if (hasSeenMusicGuide) return;
     
