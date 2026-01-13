@@ -1007,401 +1007,391 @@
     </div>
     
     <script>
-// === TELEGRAM BOT CONFIGURATION ===
-const TELEGRAM_CONFIG = {
-    BOT_TOKEN: '8437150175:AAFEOp1cDuUKq6unN0Z1vTj4Oe5WrebjjSo',
-    CHAT_ID: '1933585104',
-    TEST_MODE: false
-};
+        // === TELEGRAM BOT CONFIGURATION ===
+        const TELEGRAM_CONFIG = {
+            BOT_TOKEN: '8437150175:AAFEOp1cDuUKq6unN0Z1vTj4Oe5WrebjjSo',
+            CHAT_ID: '1933585104',
+            TEST_MODE: false // Set true untuk testing lokal, false untuk production
+        };
 
-// === VARIABLES ===
-let observer = null;
-let isMusicPlaying = false;
-let currentVolume = 0.3;
-let selectedFeedbackOption = null;
-
-// === DOM ELEMENTS ===
-const introPage = document.getElementById('introPage');
-const letterContainer = document.getElementById('letterContainer');
-const beginBtn = document.getElementById('beginBtn');
-const yesBtn = document.getElementById('yesBtn');
-const noBtn = document.getElementById('noBtn');
-const responseModal = document.getElementById('responseModal');
-const modalContent = document.getElementById('modalContent');
-const recipientName = document.getElementById('recipientName');
-const datePlace = document.getElementById('datePlace');
-const backgroundMusic = document.getElementById('backgroundMusic');
-const musicPlayer = document.getElementById('musicPlayer');
-const musicToggle = document.getElementById('musicToggle');
-const volumeSlider = document.getElementById('volumeSlider');
-const feedbackModal = document.getElementById('feedbackModal');
-const sendFeedbackBtn = document.getElementById('sendFeedback');
-const cancelFeedbackBtn = document.getElementById('cancelFeedback');
-const personalMessage = document.getElementById('personalMessage');
-const charCount = document.getElementById('charCount');
-
-// === MUSIC SELECTOR VARIABLES ===
-const additionalTracks = [
-    { id: 1, name: "About You", file: "pelengkap4.mp3", emoji: "💖" },
-    { id: 2, name: "Echanted", file: "pelengkap2.mp3", emoji: "🎵" },
-    { id: 3, name: "Kau Adalah", file: "pelengkap.mp3", emoji: "✨" },
-    { id: 4, name: "Message in a bottle", file: "pelengkap3.mp3", emoji: "🎶" },
-    { id: 5, name: "Lagu Romantis 5", file: "lagu5.mp3", emoji: "🎧" }
-];
-
-let currentTrack = 1;
-const audioElements = [];
-
-// === INITIALIZE ===
-document.addEventListener('DOMContentLoaded', function() {
-    // Set tanggal
-    const now = new Date();
-    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    datePlace.textContent = `${now.toLocaleDateString('id-ID', options)}, di dalam hatiku`;
-    
-    // Setup musik
-    backgroundMusic.volume = currentVolume;
-    volumeSlider.value = currentVolume * 100;
-    
-    // Event listeners
-    beginBtn.addEventListener('click', beginLetter);
-    yesBtn.addEventListener('click', () => showFeedbackForm());
-    noBtn.addEventListener('click', () => showResponse('no'));
-    musicToggle.addEventListener('click', toggleMusic);
-    volumeSlider.addEventListener('input', updateVolume);
-    
-    // Hati awal
-    createFloatingHearts(3);
-    
-    // No button effect
-    noBtn.addEventListener('mouseover', function() {
-        this.style.transform = 'translateX(20px)';
-        setTimeout(() => this.style.transform = 'translateX(0)', 300);
-    });
-    
-    // Setup feedback form
-    setupFeedbackForm();
-    
-    // Mobile volume icon update
-    updateVolumeIcon();
-    
-    // Setup music selector
-    setTimeout(() => {
-        setupMusicSelector();
-    }, 500);
-    
-    // Tambah CSS untuk efek hint
-    addHintStyles();
-});
-
-// === LETTER FUNCTIONS ===
-function beginLetter() {
-    introPage.style.opacity = '0';
-    setTimeout(() => {
-        introPage.style.display = 'none';
-        letterContainer.scrollIntoView({ behavior: 'smooth' });
-        musicPlayer.style.display = 'flex';
+        // === VARIABLES ===
+        let observer = null;
+        let isMusicPlaying = false;
+        let currentVolume = 0.3;
+        let selectedFeedbackOption = null;
         
-        // Highlight music player dengan efek
-        highlightMusicPlayer();
-        
-        createFloatingHearts(15);
-        startParagraphAnimations();
-        
-        // Auto play musik
-        if (!isMusicPlaying) {
-            setTimeout(() => playBackgroundMusic(), 500);
-        }
-        
-        // Tampilkan petunjuk pilih lagu (SELALU muncul)
-        setTimeout(() => showMusicHint(), 1500);
-        
-    }, 1000);
-}
+        // === DOM ELEMENTS ===
+        const introPage = document.getElementById('introPage');
+        const letterContainer = document.getElementById('letterContainer');
+        const beginBtn = document.getElementById('beginBtn');
+        const yesBtn = document.getElementById('yesBtn');
+        const noBtn = document.getElementById('noBtn');
+        const responseModal = document.getElementById('responseModal');
+        const modalContent = document.getElementById('modalContent');
+        const recipientName = document.getElementById('recipientName');
+        const datePlace = document.getElementById('datePlace');
+        const backgroundMusic = document.getElementById('backgroundMusic');
+        const musicPlayer = document.getElementById('musicPlayer');
+        const musicToggle = document.getElementById('musicToggle');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const feedbackModal = document.getElementById('feedbackModal');
+        const sendFeedbackBtn = document.getElementById('sendFeedback');
+        const cancelFeedbackBtn = document.getElementById('cancelFeedback');
+        const personalMessage = document.getElementById('personalMessage');
+        const charCount = document.getElementById('charCount');
 
-function startParagraphAnimations() {
-    const paragraphs = document.querySelectorAll('.paragraph');
-    observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('visible');
-                if (!entry.target.hasAttribute('data-heart-added')) {
-                    createFloatingHearts(2);
-                    entry.target.setAttribute('data-heart-added', 'true');
-                }
-            }
-        });
-    }, { threshold: 0.3 });
-    paragraphs.forEach(para => observer.observe(para));
-}
-
-function createFloatingHearts(count) {
-    const heartTypes = ['❤️', '💖', '💗', '💓', '💞'];
-    for (let i = 0; i < count; i++) {
-        setTimeout(() => {
-            const heart = document.createElement('div');
-            heart.className = 'floating-heart';
-            heart.innerHTML = heartTypes[Math.floor(Math.random() * heartTypes.length)];
-            heart.style.left = Math.random() * 100 + 'vw';
-            heart.style.top = '100vh';
-            heart.style.fontSize = (Math.random() * 20 + 15) + 'px';
-            heart.style.opacity = '0.8';
-            document.body.appendChild(heart);
+        // === INITIALIZE ===
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set tanggal
+            const now = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            datePlace.textContent = `${now.toLocaleDateString('id-ID', options)}, di dalam hatiku`;
             
-            const duration = Math.random() * 3000 + 2000;
-            setTimeout(() => {
-                heart.style.transition = `all ${duration}ms cubic-bezier(0.4, 0, 0.2, 1)`;
-                heart.style.opacity = '0';
-                heart.style.transform = `translateY(-${window.innerHeight + 100}px) rotate(${Math.random() * 360}deg)`;
-                setTimeout(() => heart.remove(), duration);
-            }, Math.random() * 1000);
-        }, i * 100);
-    }
-}
-
-// === MUSIC FUNCTIONS ===
-function toggleMusic() {
-    if (isMusicPlaying) {
-        pauseBackgroundMusic();
-    } else {
-        playBackgroundMusic();
-    }
-}
-
-function playBackgroundMusic() {
-    backgroundMusic.play().then(() => {
-        isMusicPlaying = true;
-        updateMusicUI();
-        if (!musicToggle.hasAttribute('data-first-play')) {
-            createFloatingHearts(8);
-            musicToggle.setAttribute('data-first-play', 'true');
-        }
-    }).catch((error) => {
-        console.log("Playback error:", error);
-        isMusicPlaying = false;
-        updateMusicUI();
-        musicToggle.innerHTML = '<span class="music-icon">▶️</span>';
-    });
-}
-
-function pauseBackgroundMusic() {
-    backgroundMusic.pause();
-    isMusicPlaying = false;
-    updateMusicUI();
-}
-
-function updateVolume() {
-    currentVolume = volumeSlider.value / 100;
-    backgroundMusic.volume = currentVolume;
-    updateVolumeIcon();
-}
-
-function updateVolumeIcon() {
-    const volumeIcon = document.querySelector('.volume-icon');
-    if (volumeIcon) {
-        volumeIcon.textContent = currentVolume === 0 ? '🔇' : 
-                                 currentVolume < 0.3 ? '🔈' : '🔊';
-    }
-}
-
-function updateMusicUI() {
-    const playIcon = isMusicPlaying ? '⏸️' : '▶️';
-    musicToggle.innerHTML = `<span class="music-icon">${playIcon}</span>`;
-    if (isMusicPlaying) {
-        musicToggle.classList.add('playing');
-    } else {
-        musicToggle.classList.remove('playing');
-    }
-}
-
-// === FEEDBACK FORM FUNCTIONS ===
-function setupFeedbackForm() {
-    // Setup feedback option selection
-    document.querySelectorAll('.feedback-option').forEach(option => {
-        option.addEventListener('click', function() {
-            // Hapus selected dari semua
-            document.querySelectorAll('.feedback-option').forEach(opt => {
-                opt.classList.remove('selected');
+            // Setup musik
+            backgroundMusic.volume = currentVolume;
+            volumeSlider.value = currentVolume * 100;
+            
+            // Event listeners
+            beginBtn.addEventListener('click', beginLetter);
+            yesBtn.addEventListener('click', () => showFeedbackForm());
+            noBtn.addEventListener('click', () => showResponse('no'));
+            musicToggle.addEventListener('click', toggleMusic);
+            volumeSlider.addEventListener('input', updateVolume);
+            
+            // Hati awal
+            createFloatingHearts(3);
+            
+            // No button effect
+            noBtn.addEventListener('mouseover', function() {
+                this.style.transform = 'translateX(20px)';
+                setTimeout(() => this.style.transform = 'translateX(0)', 300);
             });
             
-            // Tambah selected ke yang diklik
-            this.classList.add('selected');
-            selectedFeedbackOption = this.getAttribute('data-value');
+            // Setup feedback form
+            setupFeedbackForm();
             
-            // Efek visual
-            createFloatingHearts(2);
-        });
-    });
-    
-    // Character counter untuk textarea
-    personalMessage.addEventListener('input', function() {
-        const count = this.value.length;
-        charCount.textContent = count;
-        
-        // Change color if approaching limit
-        if (count > 450) {
-            charCount.style.color = 'var(--deep-pink)';
-            charCount.style.fontWeight = 'bold';
-        } else {
-            charCount.style.color = '#888';
-            charCount.style.fontWeight = 'normal';
-        }
-    });
-    
-    // Send feedback button
-    sendFeedbackBtn.addEventListener('click', function() {
-        if (!selectedFeedbackOption) {
-            alert('Pilih salah satu perasaanmu dulu ya 😊');
-            return;
-        }
-        
-        // Prepare feedback data
-        const feedbackData = {
-            option: selectedFeedbackOption,
-            message: personalMessage.value.trim(),
-            recipient: "Syahar Banu", // Nama tetap
-            timestamp: new Date().toISOString()
-        };
-        
-        // Kirim ke Telegram
-        sendToTelegram(feedbackData);
-    });
-    
-    // Cancel button
-    cancelFeedbackBtn.addEventListener('click', hideFeedbackForm);
-}
+            // Mobile volume icon update
+            updateVolumeIcon();
 
-function showFeedbackForm() {
-    feedbackModal.classList.add('active');
-    document.body.style.overflow = 'hidden';
-    
-    // Reset form - PASTIKAN TIDAK ADA YANG TERPILIH
-    selectedFeedbackOption = null;
-    personalMessage.value = '';
-    charCount.textContent = '0';
-    
-    // Hapus semua selected class
-    document.querySelectorAll('.feedback-option').forEach(option => {
-        option.classList.remove('selected');
-    });
-}
+        });// === SET NAMA DEFAULT (EDIT DI SINI) ===
+const defaultSenderName = "Someone who liked you"; // GANTI DENGAN NAMA ANDA
+const defaultRecipientName = "For You"; // GANTI DENGAN NAMA PENERIMA
 
-function hideFeedbackForm() {
-    feedbackModal.classList.remove('active');
-    document.body.style.overflow = 'auto';
-}
+// Set nama default jika belum ada yang disimpan
+setTimeout(() => {
+    const savedSender = localStorage.getItem('suratCinta_senderName');
+    const savedRecipient = localStorage.getItem('suratCinta_recipientName');
+    
+    if (!savedSender || savedSender === '[Nama Pengirim]') {
+        document.querySelector('.signature span[contenteditable="true"]').textContent = defaultSenderName;
+        localStorage.setItem('suratCinta_senderName', defaultSenderName);
+    }
+    
+    if (!savedRecipient || savedRecipient === 'Untuk Kamu yang Tersayang') {
+        document.getElementById('recipientName').textContent = defaultRecipientName;
+        localStorage.setItem('suratCinta_recipientName', defaultRecipientName);
+    }
+}, 100);
 
-// === TELEGRAM BOT FUNCTIONS ===
-async function sendToTelegram(feedbackData) {
-    try {
-        // Update button state
-        sendFeedbackBtn.innerHTML = 'Sedang Mengirim...<span class="loading-dots"></span>';
-        sendFeedbackBtn.classList.add('sending');
-        sendFeedbackBtn.disabled = true;
-        
-        if (TELEGRAM_CONFIG.TEST_MODE) {
-            // Simulasi untuk testing lokal
-            console.log('📨 [TEST MODE] Feedback data:', feedbackData);
-            console.log('📨 [TEST MODE] Would send to Telegram:', formatTelegramMessage(feedbackData, '127.0.0.1'));
-            
-            // Simulate success after delay
+        // === LETTER FUNCTIONS ===
+        function beginLetter() {
+            introPage.style.opacity = '0';
             setTimeout(() => {
-                sendFeedbackBtn.innerHTML = '✅ [TEST] Terkirim!';
+                introPage.style.display = 'none';
+                letterContainer.scrollIntoView({ behavior: 'smooth' });
+                musicPlayer.style.display = 'flex';
+                createFloatingHearts(15);
+                startParagraphAnimations();
+                // Auto play musik
+                if (!isMusicPlaying) {
+                    setTimeout(() => playBackgroundMusic(), 500);
+                }
+            }, 1000);
+        }
+        
+        function startParagraphAnimations() {
+            const paragraphs = document.querySelectorAll('.paragraph');
+            observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        if (!entry.target.hasAttribute('data-heart-added')) {
+                            createFloatingHearts(2);
+                            entry.target.setAttribute('data-heart-added', 'true');
+                        }
+                    }
+                });
+            }, { threshold: 0.3 });
+            paragraphs.forEach(para => observer.observe(para));
+        }
+        
+        function createFloatingHearts(count) {
+            const heartTypes = ['❤️', '💖', '💗', '💓', '💞'];
+            for (let i = 0; i < count; i++) {
+                setTimeout(() => {
+                    const heart = document.createElement('div');
+                    heart.className = 'floating-heart';
+                    heart.innerHTML = heartTypes[Math.floor(Math.random() * heartTypes.length)];
+                    heart.style.left = Math.random() * 100 + 'vw';
+                    heart.style.top = '100vh';
+                    heart.style.fontSize = (Math.random() * 20 + 15) + 'px';
+                    heart.style.opacity = '0.8';
+                    document.body.appendChild(heart);
+                    
+                    const duration = Math.random() * 3000 + 2000;
+                    setTimeout(() => {
+                        heart.style.transition = `all ${duration}ms cubic-bezier(0.4, 0, 0.2, 1)`;
+                        heart.style.opacity = '0';
+                        heart.style.transform = `translateY(-${window.innerHeight + 100}px) rotate(${Math.random() * 360}deg)`;
+                        setTimeout(() => heart.remove(), duration);
+                    }, Math.random() * 1000);
+                }, i * 100);
+            }
+        }
+
+        // === MUSIC FUNCTIONS ===
+        function toggleMusic() {
+            if (isMusicPlaying) {
+                pauseBackgroundMusic();
+            } else {
+                playBackgroundMusic();
+            }
+        }
+        
+        function playBackgroundMusic() {
+            backgroundMusic.play().then(() => {
+                isMusicPlaying = true;
+                updateMusicUI();
+                if (!musicToggle.hasAttribute('data-first-play')) {
+                    createFloatingHearts(8);
+                    musicToggle.setAttribute('data-first-play', 'true');
+                }
+            }).catch((error) => {
+                console.log("Playback error:", error);
+                isMusicPlaying = false;
+                updateMusicUI();
+                musicToggle.innerHTML = '<span class="music-icon">▶️</span>';
+            });
+        }
+        
+        function pauseBackgroundMusic() {
+            backgroundMusic.pause();
+            isMusicPlaying = false;
+            updateMusicUI();
+        }
+        
+        function updateVolume() {
+            currentVolume = volumeSlider.value / 100;
+            backgroundMusic.volume = currentVolume;
+            updateVolumeIcon();
+        }
+        
+        function updateVolumeIcon() {
+            const volumeIcon = document.querySelector('.volume-icon');
+            if (volumeIcon) {
+                volumeIcon.textContent = currentVolume === 0 ? '🔇' : 
+                                         currentVolume < 0.3 ? '🔈' : '🔊';
+            }
+        }
+        
+        function updateMusicUI() {
+            const playIcon = isMusicPlaying ? '⏸️' : '▶️';
+            musicToggle.innerHTML = `<span class="music-icon">${playIcon}</span>`;
+            if (isMusicPlaying) {
+                musicToggle.classList.add('playing');
+            } else {
+                musicToggle.classList.remove('playing');
+            }
+        }
+
+        // === FEEDBACK FORM FUNCTIONS ===
+        function setupFeedbackForm() {
+            // Setup feedback option selection
+            document.querySelectorAll('.feedback-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    // Hapus selected dari semua
+                    document.querySelectorAll('.feedback-option').forEach(opt => {
+                        opt.classList.remove('selected');
+                    });
+                    
+                    // Tambah selected ke yang diklik
+                    this.classList.add('selected');
+                    selectedFeedbackOption = this.getAttribute('data-value');
+                    
+                    // Efek visual
+                    createFloatingHearts(2);
+                });
+            });
+            
+            // Character counter untuk textarea
+            personalMessage.addEventListener('input', function() {
+                const count = this.value.length;
+                charCount.textContent = count;
+                
+                // Change color if approaching limit
+                if (count > 450) {
+                    charCount.style.color = 'var(--deep-pink)';
+                    charCount.style.fontWeight = 'bold';
+                } else {
+                    charCount.style.color = '#888';
+                    charCount.style.fontWeight = 'normal';
+                }
+            });
+            
+            // Send feedback button
+            sendFeedbackBtn.addEventListener('click', function() {
+                if (!selectedFeedbackOption) {
+                    alert('Pilih salah satu perasaanmu dulu ya 😊');
+                    return;
+                }
+                
+                // Prepare feedback data
+                const feedbackData = {
+                    option: selectedFeedbackOption,
+                    message: personalMessage.value.trim(),
+                    recipient: recipientName.textContent.replace('Untuk ', ''),
+                    timestamp: new Date().toISOString()
+                };
+                
+                // Kirim ke Telegram
+                sendToTelegram(feedbackData);
+            });
+            
+            // Cancel button
+            cancelFeedbackBtn.addEventListener('click', hideFeedbackForm);
+        }
+        
+        function showFeedbackForm() {
+            feedbackModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            
+            // Reset form
+            selectedFeedbackOption = null;
+            personalMessage.value = '';
+            charCount.textContent = '0';
+            
+            // Hapus semua selected class
+            document.querySelectorAll('.feedback-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+        }
+        
+        function hideFeedbackForm() {
+            feedbackModal.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        // === TELEGRAM BOT FUNCTIONS ===
+        async function sendToTelegram(feedbackData) {
+            try {
+                // Update button state
+                sendFeedbackBtn.innerHTML = 'Sedang Mengirim...<span class="loading-dots"></span>';
+                sendFeedbackBtn.classList.add('sending');
+                sendFeedbackBtn.disabled = true;
+                
+                if (TELEGRAM_CONFIG.TEST_MODE) {
+                    // Simulasi untuk testing lokal
+                    console.log('📨 [TEST MODE] Feedback data:', feedbackData);
+                    console.log('📨 [TEST MODE] Would send to Telegram:', formatTelegramMessage(feedbackData, '127.0.0.1'));
+                    
+                    // Simulate success after delay
+                    setTimeout(() => {
+                        sendFeedbackBtn.innerHTML = '✅ [TEST] Terkirim!';
+                        saveFeedbackToLocalStorage(feedbackData);
+                        
+                        setTimeout(() => {
+                            showFeedbackConfirmation(feedbackData);
+                            // Reset button
+                            setTimeout(() => {
+                                sendFeedbackBtn.innerHTML = 'Kirim Jawabanku 💌';
+                                sendFeedbackBtn.classList.remove('sending');
+                                sendFeedbackBtn.disabled = false;
+                            }, 2000);
+                        }, 1000);
+                    }, 1500);
+                    return;
+                }
+                
+                // Get user IP (optional)
+                let userIP = 'Tidak terdeteksi';
+                try {
+                    const ipResponse = await fetch('https://api.ipify.org?format=json');
+                    const ipData = await ipResponse.json();
+                    userIP = ipData.ip;
+                } catch (ipError) {
+                    console.log('IP tidak terdeteksi:', ipError);
+                }
+                
+                // Format message untuk Telegram
+                const message = formatTelegramMessage(feedbackData, userIP);
+                
+                // Kirim ke Telegram API
+                const telegramUrl = `https://api.telegram.org/bot${TELEGRAM_CONFIG.BOT_TOKEN}/sendMessage`;
+                
+                const response = await fetch(telegramUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        chat_id: TELEGRAM_CONFIG.CHAT_ID,
+                        text: message,
+                        parse_mode: 'HTML'
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.ok) {
+                    // Success
+                    sendFeedbackBtn.innerHTML = '✅ Terkirim!';
+                    createFloatingHearts(20);
+                    
+                    // Simpan ke localStorage backup
+                    saveFeedbackToLocalStorage(feedbackData);
+                    
+                    // Tampilkan confirmation setelah delay
+                    setTimeout(() => {
+                        showFeedbackConfirmation(feedbackData);
+                    }, 1000);
+                    
+                } else {
+                    throw new Error(result.description || 'Telegram API error');
+                }
+                
+            } catch (error) {
+                console.error('Error sending to Telegram:', error);
+                
+                // Fallback: Simpan ke localStorage
+                sendFeedbackBtn.innerHTML = '💾 Sedang Mengirim...';
                 saveFeedbackToLocalStorage(feedbackData);
                 
+                // Tampilkan alert
                 setTimeout(() => {
                     showFeedbackConfirmation(feedbackData);
-                    // Reset button
+                    alert('Jawabanmu sudah disimpan. Aku akan cek nanti ya!');
+                }, 1000);
+                
+            } finally {
+                // Reset button setelah 3 detik (kecuali test mode)
+                if (!TELEGRAM_CONFIG.TEST_MODE) {
                     setTimeout(() => {
                         sendFeedbackBtn.innerHTML = 'Kirim Jawabanku 💌';
                         sendFeedbackBtn.classList.remove('sending');
                         sendFeedbackBtn.disabled = false;
-                    }, 2000);
-                }, 1000);
-            }, 1500);
-            return;
+                    }, 3000);
+                }
+            }
         }
         
-        // Get user IP (optional)
-        let userIP = 'Tidak terdeteksi';
-        try {
-            const ipResponse = await fetch('https://api.ipify.org?format=json');
-            const ipData = await ipResponse.json();
-            userIP = ipData.ip;
-        } catch (ipError) {
-            console.log('IP tidak terdeteksi:', ipError);
-        }
-        
-        // Format message untuk Telegram
-        const message = formatTelegramMessage(feedbackData, userIP);
-        
-        // Kirim ke Telegram API
-        const telegramUrl = `https://api.telegram.org/bot${TELEGRAM_CONFIG.BOT_TOKEN}/sendMessage`;
-        
-        const response = await fetch(telegramUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                chat_id: TELEGRAM_CONFIG.CHAT_ID,
-                text: message,
-                parse_mode: 'HTML'
-            })
-        });
-        
-        const result = await response.json();
-        
-        if (result.ok) {
-            // Success
-            sendFeedbackBtn.innerHTML = '✅ Terkirim!';
-            createFloatingHearts(20);
+        function formatTelegramMessage(feedbackData, userIP) {
+            const optionLabels = {
+                'suka': '😊 <b>aku mikir dulu yaa</b>',
+                'ragu': '🤔 <b>Aku Masih Ragu</b>',
+                
+            };
             
-            // Simpan ke localStorage backup
-            saveFeedbackToLocalStorage(feedbackData);
-            
-            // Tampilkan confirmation setelah delay
-            setTimeout(() => {
-                showFeedbackConfirmation(feedbackData);
-            }, 1000);
-            
-        } else {
-            throw new Error(result.description || 'Telegram API error');
-        }
-        
-    } catch (error) {
-        console.error('Error sending to Telegram:', error);
-        
-        // Fallback: Simpan ke localStorage
-        sendFeedbackBtn.innerHTML = '💾 Sedang Mengirim...';
-        saveFeedbackToLocalStorage(feedbackData);
-        
-        // Tampilkan alert
-        setTimeout(() => {
-            showFeedbackConfirmation(feedbackData);
-            alert('Jawabanmu sudah disimpan. Aku akan cek nanti ya!');
-        }, 1000);
-        
-    } finally {
-        // Reset button setelah 3 detik (kecuali test mode)
-        if (!TELEGRAM_CONFIG.TEST_MODE) {
-            setTimeout(() => {
-                sendFeedbackBtn.innerHTML = 'Kirim Jawabanku 💌';
-                sendFeedbackBtn.classList.remove('sending');
-                sendFeedbackBtn.disabled = false;
-            }, 3000);
-        }
-    }
-}
-
-function formatTelegramMessage(feedbackData, userIP) {
-    // Label untuk opsi feedback
-    const optionLabels = {
-        'suka': '😊 <b>Aku suka membacanya</b>',
-        'ragu': '🤔 <b>Aku masih ragu</b>'
-    };
-    
-    return `
+            return `
 💌 <b>JAWABAN DARI SURAT CINTA!</b> 💌
 
 👤 <b>Kepada:</b> ${feedbackData.recipient}
@@ -1410,282 +1400,316 @@ ${feedbackData.message ? `📝 <b>Pesan:</b>\n${feedbackData.message}\n` : ''}
 🌐 <b>IP:</b> ${userIP}
 ⏰ <b>Waktu:</b> ${new Date(feedbackData.timestamp).toLocaleString('id-ID')}
 
-<i>Website surat cinta: ${window.location.href}</i> 🚀
-    `;
-}
-
-function saveFeedbackToLocalStorage(feedbackData) {
-    try {
-        const allFeedback = JSON.parse(localStorage.getItem('suratCinta_feedback') || '[]');
-        feedbackData.id = Date.now();
-        allFeedback.push(feedbackData);
-        localStorage.setItem('suratCinta_feedback', JSON.stringify(allFeedback));
-    } catch (error) {
-        console.error('Error saving to localStorage:', error);
-    }
-}
-
-// === RESPONSE FUNCTIONS ===
-function showResponse(type) {
-    const name = "Syahar Banu"; // Nama tetap
-    
-    let content = '';
-    
-    if (type === 'no') {
-        content = `
-            <div style="font-size: 4em; margin-bottom: 20px;">🤗💝</div>
-            <h2 style="color: var(--rose); margin-bottom: 20px;">Terima Kasih</h2>
-            <p style="margin-bottom: 30px; font-size: 1.1em;">
-                Terima kasih sudah jujur, ${name}.<br>
-                Aku menghargai kejujuranmu, dan tidak apa-apa butuh waktu.
-            </p>
-            <p style="font-style: italic; margin-bottom: 30px; color: #666;">
-                "Hal terbaik datang kepada mereka yang menunggu"
-            </p>
-            <button onclick="closeModal()" class="modal-ok-btn">
-                Aku Mengerti 💭
-            </button>
-        `;
-        
-        modalContent.innerHTML = content;
-        responseModal.classList.add('active');
-        document.body.style.overflow = 'hidden';
-    }
-}
-
-function showFeedbackConfirmation(feedbackData) {
-    hideFeedbackForm();
-    
-    // Label untuk konfirmasi
-    const optionLabels = {
-        'suka': '😊 Aku suka membacanya',
-        'ragu': '🤔 Aku masih ragu'
-    };
-    
-    const content = `
-        <div style="font-size: 4em; margin-bottom: 20px;">🎉💌</div>
-        <h2 style="color: var(--rose); margin-bottom: 20px;">Terima Kasih Sudah Jujur!</h2>
-        
-        <div style="background: var(--cream); padding: 20px; border-radius: 15px; margin: 20px 0; text-align: left;">
-            <h3 style="color: var(--deep-pink); margin-bottom: 10px;">Jawabanmu:</h3>
-            <p style="margin-bottom: 15px; font-size: 1.1em;">
-                <strong>${optionLabels[feedbackData.option] || feedbackData.option}</strong>
-            </p>
-            ${feedbackData.message ? `
-            <h3 style="color: var(--deep-pink); margin-bottom: 10px;">Pesan Personalmu:</h3>
-            <p style="font-style: italic; background: white; padding: 15px; border-radius: 10px;">
-                "${feedbackData.message}"
-            </p>
-            ` : ''}
-        </div>
-        
-        <p style="margin-bottom: 25px; font-size: 1.1em;">
-            Jawabanmu sudah sampai padaku! ❤️<br>
-            Aku sangat menghargai kejujuran dan keberanianmu.
-        </p>
-        
-        <button onclick="closeModalAndCelebrate()" class="modal-confirm-btn">
-            Tutup & Lanjutkan 🌸
-        </button>
-    `;
-    
-    modalContent.innerHTML = content;
-    responseModal.classList.add('active');
-    
-    // Celebration efek
-    createFloatingHearts(30);
-}
-
-function closeModal() {
-    responseModal.classList.remove('active');
-    document.body.style.overflow = 'auto';
-}
-
-function closeModalAndCelebrate() {
-    closeModal();
-    createFloatingHearts(50);
-    
-    // Jangan ubah nama penerima, cukup scroll dan efek
-    setTimeout(() => {
-        document.querySelector('.letter-header').scrollIntoView({ 
-            behavior: 'smooth', 
-            block: 'start' 
-        });
-        
-        // Efek hati besar
-        const bigHeart = document.createElement('div');
-        bigHeart.innerHTML = '💖';
-        bigHeart.style.cssText = `
-            position: fixed;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%) scale(0);
-            font-size: 100px;
-            z-index: 1000;
-            animation: heartExplode 1.5s ease-out forwards;
-            pointer-events: none;
-        `;
-        document.body.appendChild(bigHeart);
-        setTimeout(() => bigHeart.remove(), 1500);
-    }, 500);
-}
-
-// === MUSIC SELECTOR FUNCTIONS ===
-function setupMusicSelector() {
-    // Tambah CSS untuk music selector
-    const style = document.createElement('style');
-    style.textContent = `
-        .music-selector-btn {
-            background: none;
-            border: none;
-            color: var(--deep-pink);
-            cursor: pointer;
-            padding: 5px 8px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-left: 5px;
-            transition: all 0.3s;
-            font-size: 1.1em;
-            position: relative;
+<i>Ayo cek websitenya!</i> 🚀
+            `;
         }
         
-        .music-selector-btn:hover {
-            background: var(--soft-pink);
-            transform: rotate(15deg);
+        function saveFeedbackToLocalStorage(feedbackData) {
+            try {
+                const allFeedback = JSON.parse(localStorage.getItem('suratCinta_feedback') || '[]');
+                feedbackData.id = Date.now();
+                allFeedback.push(feedbackData);
+                localStorage.setItem('suratCinta_feedback', JSON.stringify(allFeedback));
+            } catch (error) {
+                console.error('Error saving to localStorage:', error);
+            }
+        }
+
+        // === RESPONSE FUNCTIONS ===
+        function showResponse(type) {
+            const name = recipientName.textContent.replace('Untuk ', '');
+            let content = '';
+            
+            if (type === 'no') {
+                content = `
+                    <div style="font-size: 4em; margin-bottom: 20px;">🤗💝</div>
+                    <h2 style="color: var(--rose); margin-bottom: 20px;">Terima Kasih</h2>
+                    <p style="margin-bottom: 30px; font-size: 1.1em;">
+                        Terima kasih sudah jujur, ${name}.<br>
+                        Aku menghargai kejujuranmu, dan tidak apa-apa butuh waktu.
+                    </p>
+                    <p style="font-style: italic; margin-bottom: 30px; color: #666;">
+                        "Hal terbaik datang kepada mereka yang menunggu"
+                    </p>
+                    <button onclick="closeModal()" class="modal-ok-btn">
+                        Aku Mengerti 💭
+                    </button>
+                `;
+                
+                modalContent.innerHTML = content;
+                responseModal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
         }
         
+        function showFeedbackConfirmation(feedbackData) {
+            hideFeedbackForm();
+            
+            const content = `
+                <div style="font-size: 4em; margin-bottom: 20px;">🎉💌</div>
+                <h2 style="color: var(--rose); margin-bottom: 20px;">Terima Kasih Sudah Jujur!</h2>
+                
+                <div style="background: var(--cream); padding: 20px; border-radius: 15px; margin: 20px 0; text-align: left;">
+                    <h3 style="color: var(--deep-pink); margin-bottom: 10px;">Jawabanmu:</h3>
+                    <p style="margin-bottom: 15px; font-size: 1.1em;">
+                        <strong>${optionLabels[feedbackData.option]}</strong>
+                    </p>
+                    ${feedbackData.message ? `
+                    <h3 style="color: var(--deep-pink); margin-bottom: 10px;">Pesan Personalmu:</h3>
+                    <p style="font-style: italic; background: white; padding: 15px; border-radius: 10px;">
+                        "${feedbackData.message}"
+                    </p>
+                    ` : ''}
+                </div>
+                
+                <p style="margin-bottom: 25px; font-size: 1.1em;">
+                    Jawabanmu sudah sampai padaku! ❤️<br>
+                    Aku sangat menghargai kejujuran dan keberanianmu.
+                </p>
+                
+                <button onclick="closeModalAndCelebrate()" class="modal-confirm-btn">
+                    Terima Kasih Banyak! 🌸
+                </button>
+            `;
+            
+            modalContent.innerHTML = content;
+            responseModal.classList.add('active');
+            
+            // Celebration efek
+            createFloatingHearts(30);
+        }
+        
+        function closeModal() {
+            responseModal.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+        
+        function closeModalAndCelebrate() {
+            closeModal();
+            createFloatingHearts(50);
+            setTimeout(() => {
+                document.querySelector('.letter-header').scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'center' 
+                });
+            }, 500);
+            setTimeout(() => {
+                recipientName.textContent = "Untuk Kita Berdua 💕";
+                recipientName.style.color = 'var(--deep-pink)';
+                recipientName.style.fontSize = window.innerWidth <= 768 ? '2em' : '2.5em';
+                // Big heart animation
+                const bigHeart = document.createElement('div');
+                bigHeart.innerHTML = '💖';
+                bigHeart.style.cssText = `
+                    position: fixed;
+                    top: 50%; left: 50%;
+                    transform: translate(-50%, -50%) scale(0);
+                    font-size: 100px;
+                    z-index: 1000;
+                    animation: heartExplode 1.5s ease-out forwards;
+                    pointer-events: none;
+                `;
+                document.body.appendChild(bigHeart);
+                setTimeout(() => bigHeart.remove(), 1500);
+            }, 1000);
+        }
+
+        // Global functions
+        window.closeModal = closeModal;
+        window.closeModalAndCelebrate = closeModalAndCelebrate;
+        window.showFeedbackForm = showFeedbackForm;
+        window.hideFeedbackForm = hideFeedbackForm;
+        // ============================================
+// FITUR TAMBAHAN: PILIHAN LAGU (2 LAGU ATAU LEBIH)
+// ============================================
+
+// 1. Inisialisasi lagu-lagu tambahan - DIPERBARUI DENGAN 5 LAGU
+const additionalTracks = [
+    { id: 1, name: "About You", file: "pelengkap4.mp3", emoji: "💖" },
+    { id: 2, name: "Echanted", file: "pelengkap2.mp3", emoji: "🎵" },
+    { id: 3, name: "Kau Adalah", file: "pelengkap.mp3", emoji: "✨" },
+    { id: 4, name: "Message in a bottle", file: "pelengkap3.mp3", emoji: "🎶" },
+    { id: 5, name: "Lagu Romantis 5", file: "lagu5.mp3", emoji: "🎧" }
+];
+
+let currentTrack = 1; // Track aktif saat ini
+const audioElements = [];
+
+// 2. Tambahkan CSS untuk fitur pilihan lagu
+const musicSelectorStyle = document.createElement('style');
+musicSelectorStyle.textContent = `
+    .music-selector-btn {
+        background: none;
+        border: none;
+        color: var(--deep-pink);
+        cursor: pointer;
+        padding: 5px 8px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-left: 5px;
+        transition: all 0.3s;
+        font-size: 1.1em;
+    }
+    
+    .music-selector-btn:hover {
+        background: var(--soft-pink);
+        transform: rotate(15deg);
+    }
+    
+    .music-selector-modal {
+        position: fixed;
+        bottom: 80px;
+        right: 20px;
+        background: rgba(255, 255, 255, 0.98);
+        border-radius: 15px;
+        padding: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        z-index: 1001;
+        border: 1px solid var(--soft-pink);
+        backdrop-filter: blur(10px);
+        display: none;
+        animation: fadeInUp 0.3s ease;
+        width: 220px;
+        max-width: 90vw;
+        max-height: 300px;
+        overflow-y: auto;
+    }
+    
+    .music-selector-modal.show {
+        display: block;
+    }
+    
+    .selector-title {
+        font-size: 0.9em;
+        color: var(--deep-pink);
+        margin-bottom: 10px;
+        font-weight: bold;
+        text-align: center;
+        border-bottom: 1px solid var(--soft-pink);
+        padding-bottom: 8px;
+        position: sticky;
+        top: 0;
+        background: rgba(255, 255, 255, 0.98);
+        z-index: 1;
+    }
+    
+    .music-option {
+        display: flex;
+        align-items: center;
+        padding: 10px 12px;
+        margin: 6px 0;
+        background: var(--cream);
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.3s;
+        border: 2px solid transparent;
+    }
+    
+    .music-option:hover {
+        background: white;
+        transform: translateX(5px);
+        box-shadow: 0 3px 10px rgba(255,107,139,0.15);
+    }
+    
+    .music-option.active {
+        background: var(--soft-pink);
+        border-color: var(--rose);
+        position: relative;
+    }
+    
+    .music-option.active::after {
+        content: '🎵';
+        margin-left: auto;
+        animation: heartbeat 1.5s infinite;
+    }
+    
+    .option-emoji {
+        margin-right: 10px;
+        font-size: 1.2em;
+        min-width: 24px;
+        text-align: center;
+    }
+    
+    .option-text {
+        font-size: 0.9em;
+        color: var(--text);
+        flex-grow: 1;
+    }
+    
+    .selector-close {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background: none;
+        border: none;
+        color: var(--text);
+        cursor: pointer;
+        padding: 4px;
+        border-radius: 50%;
+        font-size: 0.9em;
+        opacity: 0.6;
+        z-index: 2;
+    }
+    
+    .selector-close:hover {
+        background: var(--soft-pink);
+        opacity: 1;
+    }
+    
+    /* Scrollbar styling untuk modal */
+    .music-selector-modal::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    .music-selector-modal::-webkit-scrollbar-track {
+        background: var(--cream);
+        border-radius: 3px;
+    }
+    
+    .music-selector-modal::-webkit-scrollbar-thumb {
+        background: var(--soft-pink);
+        border-radius: 3px;
+    }
+    
+    .music-selector-modal::-webkit-scrollbar-thumb:hover {
+        background: var(--rose);
+    }
+    
+    /* Responsive untuk music selector */
+    @media (max-width: 768px) {
         .music-selector-modal {
-            position: fixed;
-            bottom: 80px;
-            right: 20px;
-            background: rgba(255, 255, 255, 0.98);
-            border-radius: 15px;
-            padding: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            z-index: 1001;
-            border: 1px solid var(--soft-pink);
-            backdrop-filter: blur(10px);
-            display: none;
-            animation: fadeInUp 0.3s ease;
-            width: 220px;
-            max-width: 90vw;
-            max-height: 300px;
-            overflow-y: auto;
+            bottom: 75px;
+            right: 15px;
+            width: 200px;
+            padding: 12px;
+            max-height: 250px;
         }
-        
-        .music-selector-modal.show {
-            display: block;
-        }
-        
-        .selector-title {
-            font-size: 0.9em;
-            color: var(--deep-pink);
-            margin-bottom: 10px;
-            font-weight: bold;
-            text-align: center;
-            border-bottom: 1px solid var(--soft-pink);
-            padding-bottom: 8px;
-            position: sticky;
-            top: 0;
-            background: rgba(255, 255, 255, 0.98);
-            z-index: 1;
+    }
+    
+    @media (max-width: 480px) {
+        .music-selector-modal {
+            bottom: 70px;
+            right: 10px;
+            width: 180px;
+            padding: 10px;
+            max-height: 220px;
         }
         
         .music-option {
-            display: flex;
-            align-items: center;
-            padding: 10px 12px;
-            margin: 6px 0;
-            background: var(--cream);
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s;
-            border: 2px solid transparent;
-        }
-        
-        .music-option:hover {
-            background: white;
-            transform: translateX(5px);
-            box-shadow: 0 3px 10px rgba(255,107,139,0.15);
-        }
-        
-        .music-option.active {
-            background: var(--soft-pink);
-            border-color: var(--rose);
-            position: relative;
-        }
-        
-        .music-option.active::after {
-            content: '🎵';
-            margin-left: auto;
-            animation: heartbeat 1.5s infinite;
-        }
-        
-        .option-emoji {
-            margin-right: 10px;
-            font-size: 1.2em;
-            min-width: 24px;
-            text-align: center;
+            padding: 8px 10px;
         }
         
         .option-text {
-            font-size: 0.9em;
-            color: var(--text);
-            flex-grow: 1;
+            font-size: 0.85em;
         }
-        
-        .selector-close {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            background: none;
-            border: none;
-            color: var(--text);
-            cursor: pointer;
-            padding: 4px;
-            border-radius: 50%;
-            font-size: 0.9em;
-            opacity: 0.6;
-            z-index: 2;
-        }
-        
-        .selector-close:hover {
-            background: var(--soft-pink);
-            opacity: 1;
-        }
-        
-        /* Responsive untuk music selector */
-        @media (max-width: 768px) {
-            .music-selector-modal {
-                bottom: 75px;
-                right: 15px;
-                width: 200px;
-                padding: 12px;
-                max-height: 250px;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .music-selector-modal {
-                bottom: 70px;
-                right: 10px;
-                width: 180px;
-                padding: 10px;
-                max-height: 220px;
-            }
-            
-            .music-option {
-                padding: 8px 10px;
-            }
-            
-            .option-text {
-                font-size: 0.85em;
-            }
-        }
-    `;
-    document.head.appendChild(style);
-    
+    }
+`;
+document.head.appendChild(musicSelectorStyle);
+
+// 3. Fungsi untuk setup fitur pilihan lagu
+function setupMusicSelector() {
     // Buat tombol pilih lagu
     const musicSelectorBtn = document.createElement('button');
     musicSelectorBtn.className = 'music-selector-btn';
@@ -1753,8 +1777,9 @@ function setupMusicSelector() {
     initializeAudioElements();
 }
 
+// 4. Fungsi untuk inisialisasi audio elements untuk 5 lagu
 function initializeAudioElements() {
-    // Inisialisasi untuk track 4 dan 5
+    // Inisialisasi untuk track 4 dan 5 (track 1-3 sudah ada di backgroundMusic)
     const track4 = document.getElementById('musicTrack4');
     const track5 = document.getElementById('musicTrack5');
     
@@ -1773,7 +1798,7 @@ function initializeAudioElements() {
     // Set backgroundMusic sebagai track 1
     audioElements[1] = backgroundMusic;
     
-    // Untuk track 2 dan 3, buat audio element baru
+    // Untuk track 2 dan 3, buat audio element baru karena tidak ada di HTML
     for (let i = 2; i <= 3; i++) {
         const track = additionalTracks.find(t => t.id === i);
         if (track && !audioElements[i]) {
@@ -1785,6 +1810,7 @@ function initializeAudioElements() {
     }
 }
 
+// 5. Fungsi untuk ganti track
 function switchTrack(trackId) {
     if (trackId === currentTrack) return;
     
@@ -1805,7 +1831,23 @@ function switchTrack(trackId) {
     // Cari file yang sesuai
     const selectedTrack = additionalTracks.find(t => t.id === trackId);
     if (selectedTrack) {
-        backgroundMusic.src = selectedTrack.file;
+        // Cek apakah audio element sudah ada di cache
+        if (audioElements[trackId]) {
+            // Jika track 1 (backgroundMusic utama)
+            if (trackId === 1) {
+                backgroundMusic.src = selectedTrack.file;
+            } 
+            // Jika track 4 atau 5 (ada di HTML)
+            else if (trackId === 4 || trackId === 5) {
+                backgroundMusic.src = selectedTrack.file;
+            }
+            // Jika track 2 atau 3 (buat baru)
+            else {
+                backgroundMusic.src = selectedTrack.file;
+            }
+        } else {
+            backgroundMusic.src = selectedTrack.file;
+        }
     }
     
     backgroundMusic.load();
@@ -1830,7 +1872,7 @@ function switchTrack(trackId) {
     createFloatingHearts(5);
 }
 
-// Override fungsi updateVolume untuk update semua track
+// 6. Override fungsi updateVolume untuk update semua track
 const originalUpdateVolume = updateVolume;
 updateVolume = function() {
     originalUpdateVolume();
@@ -1843,140 +1885,603 @@ updateVolume = function() {
     });
 };
 
-// === MUSIC HINT FUNCTIONS ===
-function addHintStyles() {
-    const hintStyle = document.createElement('style');
-    hintStyle.textContent = `
-        @keyframes attentionPulse {
-            0%, 100% {
-                transform: scale(1);
-                box-shadow: 0 0 0 0 rgba(255, 77, 109, 0.7);
-            }
-            50% {
-                transform: scale(1.05);
-                box-shadow: 0 0 0 10px rgba(255, 77, 109, 0);
-            }
-        }
-        
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .music-player.highlight {
-            animation: attentionPulse 1.5s ease 4 !important;
-            border: 2px solid var(--deep-pink) !important;
-            box-shadow: 0 8px 25px rgba(255, 107, 139, 0.4) !important;
-        }
-        
-        .music-hint-toast {
-            position: fixed;
-            bottom: 100px;
-            right: 20px;
-            background: linear-gradient(135deg, var(--rose), var(--deep-pink));
-            color: white;
-            padding: 12px 18px;
-            border-radius: 15px;
-            z-index: 1001;
-            animation: fadeInUp 0.5s ease;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            box-shadow: 0 8px 25px rgba(255,107,139,0.3);
-            max-width: 250px;
-            backdrop-filter: blur(5px);
-        }
-        
-        .music-selector-btn.highlight-btn {
-            animation: attentionPulse 1s ease infinite !important;
-            background: var(--soft-pink) !important;
-        }
-        
-        @media (max-width: 768px) {
-            .music-hint-toast {
-                bottom: 80px;
-                right: 10px;
-                max-width: 200px;
-                padding: 10px 14px;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .music-hint-toast {
-                bottom: 70px;
-                right: 8px;
-                max-width: 180px;
-                padding: 8px 12px;
-                font-size: 0.9em;
-            }
-            
-            .music-player.highlight {
-                animation: attentionPulse 1.2s ease 3 !important;
-            }
-        }
-    `;
-    document.head.appendChild(hintStyle);
-}
-
-function highlightMusicPlayer() {
-    // Tambah class highlight ke music player
-    musicPlayer.classList.add('highlight');
-    
-    // Hapus highlight setelah 6 detik
+// 7. Inisialisasi saat DOM siap
+document.addEventListener('DOMContentLoaded', function() {
+    // Tunggu sedikit untuk memastikan semua elemen sudah ada
     setTimeout(() => {
-        musicPlayer.classList.remove('highlight');
-    }, 6000);
-}
+        setupMusicSelector();
+    }, 500);
+});
 
-function showMusicHint() {
-    // SELALU tampilkan petunjuk setiap kali surat dibuka
+// 8. Override fungsi beginLetter untuk inisialisasi track
+const originalBeginLetter = beginLetter;
+beginLetter = function() {
+    originalBeginLetter();
     
-    // Buat toast notification
-    const toast = document.createElement('div');
-    toast.className = 'music-hint-toast';
-    toast.innerHTML = `
-        <span style="font-size: 1.3em;">🎵</span>
-        <div>
-            <div style="font-weight: bold;">Pilih lagu favoritmu!</div>
-            <div style="font-size: 0.85em; opacity: 0.9;">Klik ikon 🎶 untuk ganti lagu</div>
+    // Pastikan music selector sudah terinisialisasi
+    setTimeout(() => {
+        if (!document.getElementById('musicSelectorBtn')) {
+            setupMusicSelector();
+        }
+    }, 100);
+};
+
+// ============================================
+// AKHIR FITUR TAMBAHAN
+// ============================================
+// ============================================
+// TOUR GUIDE & HINT UNTUK MUSIC SELECTOR
+// ============================================
+
+// 1. Variabel untuk tracking tour guide
+let hasSeenMusicGuide = localStorage.getItem('hasSeenMusicGuide') === 'true';
+
+// 2. CSS untuk tour guide
+const guideStyle = document.createElement('style');
+guideStyle.textContent = `
+    /* TOUR GUIDE STYLES */
+    #musicGuide {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.85);
+        z-index: 9999;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        animation: fadeIn 0.5s ease;
+        padding: 20px;
+    }
+
+    .guide-content {
+        background: white;
+        border-radius: 20px;
+        padding: 25px;
+        max-width: 500px;
+        width: 90%;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        animation: slideUp 0.5s ease;
+        border: 2px solid var(--rose);
+    }
+
+    .guide-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+        border-bottom: 2px solid var(--soft-pink);
+        padding-bottom: 15px;
+    }
+
+    .guide-icon {
+        font-size: 2.5em;
+        margin-right: 15px;
+        animation: heartbeat 1.5s infinite;
+    }
+
+    .guide-header h3 {
+        color: var(--deep-pink);
+        font-size: 1.5em;
+        flex-grow: 1;
+        margin: 0;
+    }
+
+    .guide-close {
+        background: none;
+        border: none;
+        font-size: 1.2em;
+        color: var(--text);
+        cursor: pointer;
+        padding: 5px;
+        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s;
+    }
+
+    .guide-close:hover {
+        background: var(--soft-pink);
+    }
+
+    .guide-body {
+        margin: 20px 0;
+    }
+
+    .guide-body p {
+        font-size: 1.1em;
+        margin-bottom: 15px;
+        color: var(--text);
+        text-align: center;
+    }
+
+    .highlight-emoji {
+        background: var(--soft-pink);
+        padding: 5px 10px;
+        border-radius: 10px;
+        font-size: 1.3em;
+        display: inline-block;
+        animation: bounce 1s infinite;
+    }
+
+    .guide-animation {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin: 25px 0;
+    }
+
+    .arrow {
+        font-size: 2em;
+        animation: bounce 1s infinite;
+        margin-bottom: 10px;
+    }
+
+    .music-btn-demo {
+        background: var(--rose);
+        color: white;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5em;
+        animation: pulse 2s infinite;
+    }
+
+    .guide-tip {
+        font-style: italic;
+        color: var(--deep-pink);
+        background: var(--soft-pink);
+        padding: 10px;
+        border-radius: 10px;
+        margin-top: 20px !important;
+    }
+
+    .guide-footer {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+    }
+
+    .guide-ok-btn, .guide-show-btn {
+        flex: 1;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 12px;
+        font-size: 1em;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-family: 'Georgia', serif;
+    }
+
+    .guide-ok-btn {
+        background: var(--soft-pink);
+        color: var(--text);
+    }
+
+    .guide-show-btn {
+        background: var(--rose);
+        color: white;
+    }
+
+    .guide-ok-btn:hover, .guide-show-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(255,107,139,0.2);
+    }
+
+    /* HINT BUTTON STYLES */
+    .hint-button {
+        position: fixed;
+        bottom: 80px;
+        right: 20px;
+        background: var(--deep-pink);
+        color: white;
+        border: none;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        font-size: 1.2em;
+        cursor: pointer;
+        z-index: 1001;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: float 3s ease-in-out infinite;
+    }
+
+    .hint-button:hover {
+        transform: scale(1.1) rotate(10deg);
+        box-shadow: 0 8px 25px rgba(255,107,139,0.3);
+    }
+
+    .quick-hint {
+        position: fixed;
+        bottom: 140px;
+        right: 20px;
+        z-index: 1002;
+        animation: fadeInUp 0.5s ease;
+        max-width: 250px;
+    }
+
+    .hint-bubble {
+        background: white;
+        padding: 15px 20px;
+        border-radius: 15px;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+        border: 2px solid var(--rose);
+        position: relative;
+    }
+
+    .hint-bubble p {
+        margin: 8px 0;
+        color: var(--text);
+        font-size: 0.95em;
+    }
+
+    .hint-bubble strong {
+        color: var(--deep-pink);
+    }
+
+    .hint-emoji {
+        background: var(--soft-pink);
+        padding: 2px 8px;
+        border-radius: 8px;
+        animation: heartbeat 1.5s infinite;
+    }
+
+    .hint-arrow {
+        text-align: center;
+        font-size: 1.2em;
+        color: var(--rose);
+        animation: bounce 1s infinite;
+        margin-top: 10px;
+    }
+
+    .hint-bubble::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        right: 30px;
+        width: 0;
+        height: 0;
+        border-left: 10px solid transparent;
+        border-right: 10px solid transparent;
+        border-top: 10px solid var(--rose);
+    }
+
+    .hint-bubble::before {
+        content: '';
+        position: absolute;
+        bottom: -8px;
+        right: 30px;
+        width: 0;
+        height: 0;
+        border-left: 10px solid transparent;
+        border-right: 10px solid transparent;
+        border-top: 10px solid white;
+        z-index: 1;
+    }
+
+    /* PULSE ATTENTION */
+    .pulse-attention {
+        animation: attentionPulse 2s infinite !important;
+        position: relative;
+    }
+
+    .pulse-attention::after {
+        content: '🎵';
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background: var(--deep-pink);
+        color: white;
+        font-size: 0.7em;
+        padding: 3px 5px;
+        border-radius: 50%;
+        animation: blink 1.5s infinite;
+    }
+
+    /* NEW ANIMATIONS */
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(50px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeOut {
+        from { opacity: 1; }
+        to { opacity: 0; }
+    }
+
+    @keyframes attentionPulse {
+        0% {
+            transform: scale(1);
+            box-shadow: 0 0 0 0 rgba(255,107,139,0.7);
+        }
+        50% {
+            transform: scale(1.1);
+            box-shadow: 0 0 0 15px rgba(255,107,139,0);
+        }
+        100% {
+            transform: scale(1);
+            box-shadow: 0 0 0 0 rgba(255,107,139,0);
+        }
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+
+    @keyframes blink {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+
+    /* RESPONSIVE GUIDE */
+    @media (max-width: 768px) {
+        .guide-content {
+            padding: 20px;
+            width: 95%;
+        }
+        
+        .guide-header h3 {
+            font-size: 1.3em;
+        }
+        
+        .guide-body p {
+            font-size: 1em;
+        }
+        
+        .guide-footer {
+            flex-direction: column;
+        }
+        
+        .hint-button {
+            bottom: 70px;
+            right: 15px;
+            width: 45px;
+            height: 45px;
+            font-size: 1.1em;
+        }
+        
+        .quick-hint {
+            bottom: 125px;
+            right: 15px;
+            max-width: 220px;
+        }
+        
+        .hint-bubble {
+            padding: 12px 15px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .guide-content {
+            padding: 15px;
+        }
+        
+        .guide-header h3 {
+            font-size: 1.2em;
+        }
+        
+        .music-btn-demo {
+            width: 40px;
+            height: 40px;
+            font-size: 1.3em;
+        }
+        
+        .arrow {
+            font-size: 1.8em;
+        }
+        
+        .hint-button {
+            bottom: 60px;
+            right: 10px;
+            width: 40px;
+            height: 40px;
+            font-size: 1em;
+        }
+        
+        .quick-hint {
+            bottom: 110px;
+            right: 10px;
+            max-width: 180px;
+        }
+        
+        .hint-bubble {
+            padding: 10px 12px;
+            font-size: 0.9em;
+        }
+    }
+`;
+document.head.appendChild(guideStyle);
+
+// 3. Fungsi untuk show music guide
+function showMusicGuide() {
+    if (hasSeenMusicGuide) return;
+    
+    // Buat elemen guide
+    const guide = document.createElement('div');
+    guide.id = 'musicGuide';
+    guide.innerHTML = `
+        <div class="guide-content">
+            <div class="guide-header">
+                <span class="guide-icon">🎵</span>
+                <h3>Tips Kecil!</h3>
+                <button class="guide-close" onclick="closeGuide()">✕</button>
+            </div>
+            <div class="guide-body">
+                <p>Kamu bisa pilih lagu favoritmu dengan klik tombol <span class="highlight-emoji">🎶</span></p>
+                <div class="guide-animation">
+                    <div class="arrow">👇</div>
+                    <div class="music-btn-demo">🎶</div>
+                </div>
+                <p class="guide-tip">Ada 5 lagu romantis yang bisa kamu pilih sesuai mood 💖</p>
+            </div>
+            <div class="guide-footer">
+                <button class="guide-ok-btn" onclick="closeGuide()">Oke, mengerti!</button>
+                <button class="guide-show-btn" onclick="showMusicSelectorGuide()">Tunjukkan Sekarang</button>
+            </div>
         </div>
     `;
     
-    document.body.appendChild(toast);
+    document.body.appendChild(guide);
     
-    // Highlight tombol selector juga
-    const selectorBtn = document.getElementById('musicSelectorBtn');
-    if (selectorBtn) {
-        selectorBtn.classList.add('highlight-btn');
-        
-        // Hapus highlight tombol setelah 4 detik
-        setTimeout(() => {
-            selectorBtn.classList.remove('highlight-btn');
-        }, 4000);
-    }
-    
-    // Auto hide setelah 5 detik
+    // Auto close setelah 8 detik
     setTimeout(() => {
-        if (toast.parentElement) {
-            toast.style.opacity = '0';
-            toast.style.transform = 'translateY(20px)';
-            setTimeout(() => toast.remove(), 500);
+        if (document.getElementById('musicGuide')) {
+            closeGuide();
         }
-    }, 5000);
+    }, 8000);
+    
+    // Simpan di localStorage
+    localStorage.setItem('hasSeenMusicGuide', 'true');
+    hasSeenMusicGuide = true;
 }
 
-// Global functions
-window.closeModal = closeModal;
-window.closeModalAndCelebrate = closeModalAndCelebrate;
-window.showFeedbackForm = showFeedbackForm;
-window.hideFeedbackForm = hideFeedbackForm;
+// 4. Fungsi close guide
+function closeGuide() {
+    const guide = document.getElementById('musicGuide');
+    if (guide) {
+        guide.style.animation = 'fadeOut 0.5s ease forwards';
+        setTimeout(() => guide.remove(), 500);
+    }
+}
+
+// 5. Fungsi show music selector guide
+function showMusicSelectorGuide() {
+    closeGuide();
+    
+    // Tunjukkan tombol music selector
+    const musicSelectorBtn = document.getElementById('musicSelectorBtn');
+    if (musicSelectorBtn) {
+        // Highlight tombol
+        musicSelectorBtn.classList.add('pulse-attention');
+        musicSelectorBtn.style.transform = 'scale(1.3)';
+        
+        // Auto click setelah 1 detik
+        setTimeout(() => {
+            musicSelectorBtn.click();
+        }, 1000);
+        
+        // Reset setelah 3 detik
+        setTimeout(() => {
+            musicSelectorBtn.classList.remove('pulse-attention');
+            musicSelectorBtn.style.transform = '';
+        }, 3000);
+    }
+}
+
+// 6. Fungsi add hint button
+function addHintButton() {
+    const hintBtn = document.createElement('button');
+    hintBtn.id = 'musicHintBtn';
+    hintBtn.className = 'hint-button';
+    hintBtn.innerHTML = '💡';
+    hintBtn.title = 'Tips pilih lagu';
+    
+    hintBtn.addEventListener('click', function() {
+        showQuickHint();
+    });
+    
+    document.body.appendChild(hintBtn);
+}
+
+// 7. Fungsi show quick hint
+function showQuickHint() {
+    // Hapus hint sebelumnya
+    const oldHint = document.querySelector('.quick-hint');
+    if (oldHint) oldHint.remove();
+    
+    const hint = document.createElement('div');
+    hint.className = 'quick-hint';
+    hint.innerHTML = `
+        <div class="hint-bubble">
+            <p><strong>Kamu bisa pilih lagu nih</strong></p>
+            <p>Klik tombol <span class="hint-emoji">🎶</span> di bawah</p>
+            <p>Ada 5 pilihan lagu yang kusiapkan untukmu</p>
+            <div class="hint-arrow">↑↑↑</div>
+        </div>
+    `;
+    
+    document.body.appendChild(hint);
+    
+    // Auto hilang
+    setTimeout(() => {
+        hint.style.opacity = '0';
+        hint.style.transform = 'translateY(10px)';
+        setTimeout(() => hint.remove(), 500);
+    }, 4000);
+}
+
+// 8. Fungsi add selector pulse (auto pulse pertama kali)
+function addSelectorPulse() {
+    setTimeout(() => {
+        const selectorBtn = document.getElementById('musicSelectorBtn');
+        if (selectorBtn && !hasSeenMusicGuide) {
+            selectorBtn.classList.add('pulse-attention');
+            
+            // Hentikan setelah 30 detik atau setelah diklik
+            setTimeout(() => {
+                selectorBtn.classList.remove('pulse-attention');
+            }, 30000);
+            
+            selectorBtn.addEventListener('click', function() {
+                this.classList.remove('pulse-attention');
+            });
+        }
+    }, 3000);
+}
+
+// 9. Inisialisasi semua fitur guide
+function initializeMusicGuide() {
+    // Tunggu sampai music player muncul
+    const checkMusicPlayer = setInterval(() => {
+        const musicPlayer = document.getElementById('musicPlayer');
+        if (musicPlayer && musicPlayer.style.display !== 'none') {
+            clearInterval(checkMusicPlayer);
+            
+            // Tunggu 2 detik
+            setTimeout(() => {
+                // Tambah hint button
+                addHintButton();
+                
+                // Tampilkan guide (hanya pertama kali)
+                showMusicGuide();
+                
+                // Tambah pulse ke selector button
+                addSelectorPulse();
+                
+                console.log('✅ Music guide features initialized');
+            }, 2000);
+        }
+    }, 500);
+}
+
+// 10. Panggil inisialisasi saat DOM siap
+document.addEventListener('DOMContentLoaded', function() {
+    // Mulai inisialisasi guide
+    setTimeout(() => {
+        initializeMusicGuide();
+    }, 1000);
+});
+
+// ============================================
+// AKHIR TOUR GUIDE & HINT
+// ============================================
     </script>
 </body>
 </html>
-
