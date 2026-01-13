@@ -1095,19 +1095,28 @@ setTimeout(() => {
 
         // === LETTER FUNCTIONS ===
         function beginLetter() {
-            introPage.style.opacity = '0';
-            setTimeout(() => {
-                introPage.style.display = 'none';
-                letterContainer.scrollIntoView({ behavior: 'smooth' });
-                musicPlayer.style.display = 'flex';
-                createFloatingHearts(15);
-                startParagraphAnimations();
-                // Auto play musik
-                if (!isMusicPlaying) {
-                    setTimeout(() => playBackgroundMusic(), 500);
-                }
-            }, 1000);
+    introPage.style.opacity = '0';
+    setTimeout(() => {
+        introPage.style.display = 'none';
+        letterContainer.scrollIntoView({ behavior: 'smooth' });
+        musicPlayer.style.display = 'flex';
+        
+        createFloatingHearts(15);
+        startParagraphAnimations();
+        
+        // Auto play musik
+        if (!isMusicPlaying) {
+            setTimeout(() => playBackgroundMusic(), 500);
         }
+        
+        // Panggil guide setelah music player muncul
+        setTimeout(() => {
+            showMusicGuide(); // LANGSUNG PANGGIL GUIDE
+            addSelectorPulse(); // Tambah pulse ke tombol
+        }, 1500);
+        
+    }, 1000);
+}
         
         function startParagraphAnimations() {
             const paragraphs = document.querySelectorAll('.paragraph');
@@ -1958,6 +1967,7 @@ function showMusicGuide() {
 
 // === UPDATE FUNGSI addSelectorPulse ===
 function addSelectorPulse() {
+    // Tunggu sampai tombol selector benar-benar ada
     setTimeout(() => {
         const selectorBtn = document.getElementById('musicSelectorBtn');
         if (selectorBtn) {
@@ -1971,8 +1981,11 @@ function addSelectorPulse() {
             selectorBtn.addEventListener('click', function() {
                 this.classList.remove('pulse-attention');
             });
+        } else {
+            // Jika tombol belum ada, coba lagi
+            setTimeout(addSelectorPulse, 500);
         }
-    }, 3000);
+    }, 1000);
 }
 
 // === UPDATE FUNGSI initializeMusicGuide ===
@@ -2013,5 +2026,6 @@ window.toggleMusicGuide = function() {
     </script>
 </body>
 </html>
+
 
 
