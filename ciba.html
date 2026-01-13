@@ -1913,9 +1913,6 @@ beginLetter = function() {
 // TOUR GUIDE & HINT UNTUK MUSIC SELECTOR
 // ============================================
 
-// 1. Variabel untuk tracking tour guide
-let hasSeenMusicGuide = localStorage.getItem('hasSeenMusicGuide') === 'true';
-
 // 2. CSS untuk tour guide
 const guideStyle = document.createElement('style');
 guideStyle.textContent = `
@@ -2309,9 +2306,13 @@ guideStyle.textContent = `
 `;
 document.head.appendChild(guideStyle);
 
-// 3. Fungsi untuk show music guide
+// === HAPUS VARIABEL INI ===
+// let hasSeenMusicGuide = localStorage.getItem('hasSeenMusicGuide') === 'true';
+
+// === UPDATE FUNGSI showMusicGuide ===
 function showMusicGuide() {
-    if (hasSeenMusicGuide) return;
+    // HAPUS BARIS INI: if (hasSeenMusicGuide) return;
+    // GUIDE MUNCUL SETIAP KALI (UNLIMITED)
     
     // Buat elemen guide
     const guide = document.createElement('div');
@@ -2347,91 +2348,15 @@ function showMusicGuide() {
         }
     }, 8000);
     
-    // Simpan di localStorage
-    localStorage.setItem('hasSeenMusicGuide', 'true');
-    hasSeenMusicGuide = true;
+    // HAPUS BARIS INI: localStorage.setItem('hasSeenMusicGuide', 'true');
+    // HAPUS BARIS INI: hasSeenMusicGuide = true;
 }
 
-// 4. Fungsi close guide
-function closeGuide() {
-    const guide = document.getElementById('musicGuide');
-    if (guide) {
-        guide.style.animation = 'fadeOut 0.5s ease forwards';
-        setTimeout(() => guide.remove(), 500);
-    }
-}
-
-// 5. Fungsi show music selector guide
-function showMusicSelectorGuide() {
-    closeGuide();
-    
-    // Tunjukkan tombol music selector
-    const musicSelectorBtn = document.getElementById('musicSelectorBtn');
-    if (musicSelectorBtn) {
-        // Highlight tombol
-        musicSelectorBtn.classList.add('pulse-attention');
-        musicSelectorBtn.style.transform = 'scale(1.3)';
-        
-        // Auto click setelah 1 detik
-        setTimeout(() => {
-            musicSelectorBtn.click();
-        }, 1000);
-        
-        // Reset setelah 3 detik
-        setTimeout(() => {
-            musicSelectorBtn.classList.remove('pulse-attention');
-            musicSelectorBtn.style.transform = '';
-        }, 3000);
-    }
-}
-
-// 6. Fungsi add hint button
-function addHintButton() {
-    const hintBtn = document.createElement('button');
-    hintBtn.id = 'musicHintBtn';
-    hintBtn.className = 'hint-button';
-    hintBtn.innerHTML = '💡';
-    hintBtn.title = 'Tips pilih lagu';
-    
-    hintBtn.addEventListener('click', function() {
-        showQuickHint();
-    });
-    
-    document.body.appendChild(hintBtn);
-}
-
-// 7. Fungsi show quick hint
-function showQuickHint() {
-    // Hapus hint sebelumnya
-    const oldHint = document.querySelector('.quick-hint');
-    if (oldHint) oldHint.remove();
-    
-    const hint = document.createElement('div');
-    hint.className = 'quick-hint';
-    hint.innerHTML = `
-        <div class="hint-bubble">
-            <p><strong>Kamu bisa pilih lagu nih</strong></p>
-            <p>Klik tombol <span class="hint-emoji">🎶</span> di bawah</p>
-            <p>Ada 5 pilihan lagu yang kusiapkan untukmu</p>
-            <div class="hint-arrow">↑↑↑</div>
-        </div>
-    `;
-    
-    document.body.appendChild(hint);
-    
-    // Auto hilang
-    setTimeout(() => {
-        hint.style.opacity = '0';
-        hint.style.transform = 'translateY(10px)';
-        setTimeout(() => hint.remove(), 500);
-    }, 4000);
-}
-
-// 8. Fungsi add selector pulse (auto pulse pertama kali)
+// === UPDATE FUNGSI addSelectorPulse ===
 function addSelectorPulse() {
     setTimeout(() => {
         const selectorBtn = document.getElementById('musicSelectorBtn');
-        if (selectorBtn && !hasSeenMusicGuide) {
+        if (selectorBtn) {
             selectorBtn.classList.add('pulse-attention');
             
             // Hentikan setelah 30 detik atau setelah diklik
@@ -2446,7 +2371,7 @@ function addSelectorPulse() {
     }, 3000);
 }
 
-// 9. Inisialisasi semua fitur guide
+// === UPDATE FUNGSI initializeMusicGuide ===
 function initializeMusicGuide() {
     // Tunggu sampai music player muncul
     const checkMusicPlayer = setInterval(() => {
@@ -2459,7 +2384,7 @@ function initializeMusicGuide() {
                 // Tambah hint button
                 addHintButton();
                 
-                // Tampilkan guide (hanya pertama kali)
+                // Tampilkan guide (SETIAP KALI/UNLIMITED)
                 showMusicGuide();
                 
                 // Tambah pulse ke selector button
@@ -2471,13 +2396,16 @@ function initializeMusicGuide() {
     }, 500);
 }
 
-// 10. Panggil inisialisasi saat DOM siap
-document.addEventListener('DOMContentLoaded', function() {
-    // Mulai inisialisasi guide
-    setTimeout(() => {
-        initializeMusicGuide();
-    }, 1000);
-});
+// === TAMBAH JIKA INGIN TOGGLE GUIDE (OPSIONAL) ===
+// Bisa tambah tombol untuk show/hide guide di console
+window.toggleMusicGuide = function() {
+    const existingGuide = document.getElementById('musicGuide');
+    if (existingGuide) {
+        closeGuide();
+    } else {
+        showMusicGuide();
+    }
+};
 
 // ============================================
 // AKHIR TOUR GUIDE & HINT
@@ -2485,3 +2413,4 @@ document.addEventListener('DOMContentLoaded', function() {
     </script>
 </body>
 </html>
+
