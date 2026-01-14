@@ -1490,7 +1490,7 @@
                     </span>
                 </div>
                 <h1 class="recipient" id="recipientName" style="color: var(--deep-pink); font-weight: bold; font-family: Arial, Helvetica, sans-serif;">Untukmu
-                    Syahar Banu</h1>
+                    ?????</h1>
             </div>
         </div>
     </div>
@@ -1976,8 +1976,8 @@ ${feedbackData.message ? `📝 <b>Pesan:</b>\n${feedbackData.message}\n` : ''}
         setTimeout(() => {
             const feedbackData = {
                 option: 'perlu_waktu',
-                message: 'Aku Perlu Waktu',
-                recipient: name,
+                message: 'User memilih "Aku Perlu Waktu"',
+                recipient: "Musa",
                 timestamp: new Date().toISOString()
             };
             
@@ -2021,7 +2021,7 @@ window.closeModal = function() {
     document.body.style.overflow = 'auto';
 }
         
-function showFeedbackConfirmation(feedbackData) {
+        function showFeedbackConfirmation(feedbackData) {
     hideFeedbackForm();
     
     // Tentukan label berdasarkan option
@@ -2031,7 +2031,7 @@ function showFeedbackConfirmation(feedbackData) {
     } else if (feedbackData.option === 'ragu') {
         responseLabel = '🤔 Aku masih ragu';
     } else if (feedbackData.option === 'perlu_waktu') {
-        responseLabel = '⏳ Aku perlu waktu';  // TAMBAH INI
+        responseLabel = '⏳ Aku perlu waktu';  
     } else {
         responseLabel = feedbackData.option;
     }
@@ -2450,6 +2450,4 @@ function showFeedbackConfirmation(feedbackData) {
     </script>
 </body>
 </html>
-
-
 
