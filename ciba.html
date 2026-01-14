@@ -2021,42 +2021,54 @@ window.closeModal = function() {
     document.body.style.overflow = 'auto';
 }
         
-        function showFeedbackConfirmation(feedbackData) {
-            hideFeedbackForm();
-            
-            const content = `
-                <div style="font-size: 4em; margin-bottom: 20px;">🎉💌</div>
-                <h2 style="color: var(--rose); margin-bottom: 20px;">Terima Kasih Sudah Jujur!</h2>
-                
-                <div style="background: var(--cream); padding: 20px; border-radius: 15px; margin: 20px 0; text-align: left;">
-                    <h3 style="color: var(--deep-pink); margin-bottom: 10px;">Jawabanmu:</h3>
-                    <p style="margin-bottom: 15px; font-size: 1.1em;">
-                        <strong>${feedbackData.option === 'suka' ? '😊 Aku suka membacanya' : '🤔 Aku masih ragu'}</strong>
-                    </p>
-                    ${feedbackData.message ? `
-                    <h3 style="color: var(--deep-pink); margin-bottom: 10px;">Pesan Personalmu:</h3>
-                    <p style="font-style: italic; background: white; padding: 15px; border-radius: 10px;">
-                        "${feedbackData.message}"
-                    </p>
-                    ` : ''}
-                </div>
-                
-                <p style="margin-bottom: 25px; font-size: 1.1em;">
-                    Jawabanmu sudah sampai padaku! ❤️<br>
-                    Aku sangat menghargai kejujuran dan keberanianmu.
-                </p>
-                
-                <button onclick="closeModalAndCelebrate()" class="modal-confirm-btn">
-                    Terima Kasih Banyak! 🌸
-                </button>
-            `;
-            
-            modalContent.innerHTML = content;
-            responseModal.classList.add('active');
-            
-            // Celebration efek
-            createFloatingHearts(30);
-        }
+function showFeedbackConfirmation(feedbackData) {
+    hideFeedbackForm();
+    
+    // Tentukan label berdasarkan option
+    let responseLabel = '';
+    if (feedbackData.option === 'suka') {
+        responseLabel = '😊 Aku suka membacanya';
+    } else if (feedbackData.option === 'ragu') {
+        responseLabel = '🤔 Aku masih ragu';
+    } else if (feedbackData.option === 'perlu_waktu') {
+        responseLabel = '⏳ Aku perlu waktu';  // TAMBAH INI
+    } else {
+        responseLabel = feedbackData.option;
+    }
+    
+    const content = `
+        <div style="font-size: 4em; margin-bottom: 20px;">🎉💌</div>
+        <h2 style="color: var(--rose); margin-bottom: 20px;">Terima Kasih Sudah Jujur!</h2>
+        
+        <div style="background: var(--cream); padding: 20px; border-radius: 15px; margin: 20px 0; text-align: left;">
+            <h3 style="color: var(--deep-pink); margin-bottom: 10px;">Jawabanmu:</h3>
+            <p style="margin-bottom: 15px; font-size: 1.1em;">
+                <strong>${responseLabel}</strong>  <!-- PAKAI VARIABLE BARU -->
+            </p>
+            ${feedbackData.message ? `
+            <h3 style="color: var(--deep-pink); margin-bottom: 10px;">Pesan Personalmu:</h3>
+            <p style="font-style: italic; background: white; padding: 15px; border-radius: 10px;">
+                "${feedbackData.message}"
+            </p>
+            ` : ''}
+        </div>
+        
+        <p style="margin-bottom: 25px; font-size: 1.1em;">
+            Jawabanmu sudah sampai padaku! ❤️<br>
+            Aku sangat menghargai kejujuran dan keberanianmu.
+        </p>
+        
+        <button onclick="closeModalAndCelebrate()" class="modal-confirm-btn">
+            Terima Kasih Banyak! 🌸
+        </button>
+    `;
+    
+    modalContent.innerHTML = content;
+    responseModal.classList.add('active');
+    
+    // Celebration efek
+    createFloatingHearts(30);
+}
         
         function closeModal() {
             responseModal.classList.remove('active');
@@ -2438,5 +2450,6 @@ window.closeModal = function() {
     </script>
 </body>
 </html>
+
 
 
